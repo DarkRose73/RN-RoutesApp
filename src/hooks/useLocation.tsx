@@ -11,25 +11,34 @@ export const useLocation = () => {
 
   // Obtener coordenadas del dispositivo
   useEffect(() => {
-    // getCurrentPosition(success, error, options{})
-    Geolocation.getCurrentPosition(
-      ({coords}) => {
-        setInitialPosition({
-          lat: coords.latitude,
-          lon: coords.longitude,
-        });
-        setHasLocation(true);
-      },
-      err => console.log(err),
-      {
-        distanceFilter: 100,
-        enableHighAccuracy: true,
-      },
-    );
+    getCurrentLocation().then(location => {
+      setInitialPosition(location);
+      setHasLocation(true);
+    });
   }, []);
+
+  const getCurrentLocation = (): Promise<Location> => {
+    return new Promise((resolve, reject) => {
+      // getCurrentPosition(success, error, options{})
+      Geolocation.getCurrentPosition(
+        ({coords}) => {
+          resolve({
+            lat: coords.latitude,
+            lon: coords.longitude,
+          });
+        },
+        err => reject({err}),
+        {
+          distanceFilter: 100,
+          enableHighAccuracy: true,
+        },
+      );
+    });
+  };
 
   return {
     hasLocation,
     initialPosition,
+    getCurrentLocation,
   };
 };
