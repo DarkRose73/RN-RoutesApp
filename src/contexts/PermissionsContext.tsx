@@ -28,6 +28,8 @@ export const PermissionsProvider = ({children}: any) => {
 
   // Consulta el estado del permiso al abrir la app
   useEffect(() => {
+    checkLocationPermission();
+
     AppState.addEventListener('change', state => {
       if (state !== 'active') return;
 
