@@ -1,24 +1,19 @@
 import React from 'react';
 import MapView, {Marker} from 'react-native-maps';
-import Geolocation from '@react-native-community/geolocation';
-import {useEffect} from 'react';
+import {useLocation} from '../hooks/useLocation';
+import {LoadingScreen} from '../screens/LoadingScreen';
 
 interface Props {
   markers?: (typeof Marker)[];
 }
 
 export const Map = ({markers}: Props) => {
-  useEffect(() => {
-    // getCurrentPosition(success, error, options{})
-    Geolocation.getCurrentPosition(
-      info => console.log(info),
-      err => console.log(err),
-      {
-        distanceFilter: 100,
-        enableHighAccuracy: true,
-      },
-    );
-  }, []);
+  const {hasLocation, initialPosition} = useLocation();
+
+  if (!hasLocation) {
+    // Espere mientras se carga la geolocalizacion
+    return <LoadingScreen />;
+  }
 
   return (
     <>
@@ -26,8 +21,8 @@ export const Map = ({markers}: Props) => {
         style={{flex: 1}}
         showsUserLocation
         initialRegion={{
-          latitude: 37.78825,
-          longitude: -122.4324,
+          latitude: initialPosition.lat,
+          longitude: initialPosition.lon,
           latitudeDelta: 0.0922,
           longitudeDelta: 0.0421,
         }}>
