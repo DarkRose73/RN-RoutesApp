@@ -3,15 +3,39 @@ import MapView, {Marker} from 'react-native-maps';
 import {useLocation} from '../hooks/useLocation';
 import {LoadingScreen} from '../screens/LoadingScreen';
 import {FAB} from './FAB';
+import {useEffect} from 'react';
 
 interface Props {
   markers?: (typeof Marker)[];
 }
 
 export const Map = ({markers}: Props) => {
-  const {hasLocation, initialPosition, getCurrentLocation} = useLocation();
+  const {
+    hasLocation,
+    initialPosition,
+    getCurrentLocation,
+    followUserLocation,
+    userLocation,
+  } = useLocation();
 
   const mapViewRef = useRef<MapView>();
+
+  useEffect(() => {
+    followUserLocation();
+    return () => {
+      // TODO: cancelar movimiento
+    };
+  }, []);
+
+  useEffect(() => {
+    const {lat, lon} = userLocation;
+    mapViewRef.current?.animateCamera({
+      center: {
+        latitude: lat,
+        longitude: lon,
+      },
+    });
+  }, [userLocation]);
 
   const centerPosition = async () => {
     const {lat, lon} = await getCurrentLocation();
