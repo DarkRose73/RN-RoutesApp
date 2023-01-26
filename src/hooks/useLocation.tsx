@@ -1,6 +1,7 @@
 import {useEffect, useRef, useState} from 'react';
 import Geolocation from '@react-native-community/geolocation';
 import {Location} from '../interfaces/appInterfaces';
+import {LatLng} from 'react-native-maps';
 
 export const useLocation = () => {
   const [hasLocation, setHasLocation] = useState(false);
@@ -15,6 +16,8 @@ export const useLocation = () => {
     lon: 0,
   });
 
+  const [routeLines, setRouteLines] = useState<LatLng[]>([]);
+
   const watchId = useRef<number>();
 
   // Obtener coordenadas del dispositivo
@@ -22,6 +25,10 @@ export const useLocation = () => {
     getCurrentLocation().then(location => {
       setInitialPosition(location);
       setUserLocation(location);
+      setRouteLines(routeLines => [
+        ...routeLines,
+        {latitude: location.lat, longitude: location.lon},
+      ]);
       setHasLocation(true);
     });
   }, []);
@@ -48,10 +55,15 @@ export const useLocation = () => {
   const followUserLocation = () => {
     watchId.current = Geolocation.watchPosition(
       ({coords}) => {
-        setUserLocation({
+        const location: Location = {
           lat: coords.latitude,
           lon: coords.longitude,
-        });
+        };
+        setUserLocation(location);
+        setRouteLines(routeLines => [
+          ...routeLines,
+          {latitude: location.lat, longitude: location.lon},
+        ]);
       },
       err => {},
       {
@@ -69,6 +81,7 @@ export const useLocation = () => {
     hasLocation,
     initialPosition,
     userLocation,
+    routeLines,
     getCurrentLocation,
     followUserLocation,
     stopFollowUserLocation,
