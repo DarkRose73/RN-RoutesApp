@@ -20,9 +20,19 @@ export const useLocation = () => {
 
   const watchId = useRef<number>();
 
+  const isMounted = useRef(true);
+
+  useEffect(() => {
+    isMounted.current = true;
+    return () => {
+      isMounted.current = false;
+    };
+  }, []);
+
   // Obtener coordenadas del dispositivo
   useEffect(() => {
     getCurrentLocation().then(location => {
+      if (!isMounted) return;
       setInitialPosition(location);
       setUserLocation(location);
       setRouteLines(routeLines => [
@@ -55,10 +65,13 @@ export const useLocation = () => {
   const followUserLocation = () => {
     watchId.current = Geolocation.watchPosition(
       ({coords}) => {
+        if (!isMounted) return;
+
         const location: Location = {
           lat: coords.latitude,
           lon: coords.longitude,
         };
+
         setUserLocation(location);
         setRouteLines(routeLines => [
           ...routeLines,
